@@ -121,7 +121,7 @@ Power BI                    (Reporting — dashboards and visualizations)
 
 **Rahul Varma** — Final Year B.Tech Information Technology, MIT Manipal  
 ITR Project | Data Architecture & Engineering Department  
-[LinkedIn](https://linkedin.com/in/) <!-- add your LinkedIn URL here -->
+[LinkedIn](https://www.linkedin.com/in/dhanunjay-rahul-varma-646893270/) <!-- add your LinkedIn URL here -->
 
 ---
 
