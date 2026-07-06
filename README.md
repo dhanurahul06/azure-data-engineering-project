@@ -61,11 +61,16 @@ Power BI                    (Reporting — dashboards and visualizations)
 - All three tables (`Customers`, `Products`, `Orders`) verified landing correctly as delimited text files in `landing/customers/`, `landing/products/`, `landing/orders/`
 - Resolved real issues along the way: an expired storage account key causing authentication failures, and incorrect dataset path/schema configuration during initial setup
 
-### 🔄 Phase 4 — Databricks Transformation + Unity Catalog (In Progress)
+### ✅ Phase 4 — Databricks Transformation + Unity Catalog
 - Set up Azure Databricks workspace (Premium tier, serverless compute)
 - Connected ADLS Gen2 to Unity Catalog via Access Connector (managed identity) and External Location — verified read/write/list/delete access
 - PySpark notebook (`customer_transform.ipynb`): read raw customer CSV → added derived `FullName` column → wrote result as Parquet → read Parquet back and wrote a cleaned CSV to a separate `processed/` folder
-- Next: write transformed data directly into Unity Catalog managed tables (rather than files), plus create a Unity Catalog view and SQL function
+- Created a dedicated Unity Catalog schema (`customer_data`) for the project
+- PySpark notebook (`unity_catalog_work.ipynb`):
+  - Read cleaned customer CSV and wrote it into a managed Unity Catalog table (`customers_bronze`)
+  - Re-read the source data, added a derived `IsMetro` column, and wrote it into a second managed table (`customers_enriched`)
+  - Created a Unity Catalog **view** (`metro_customers_view`) filtering enriched customers to metro cities only
+  - Created a Unity Catalog **SQL function** (`classify_signup`) categorizing customers as "Recent" or "Older" based on signup date, called directly within a query
 
 ### ⏳ Phase 5 — Further Cleaning and Gold Layer
 - Read Silver Unity Catalog tables into Databricks
@@ -84,7 +89,8 @@ Power BI                    (Reporting — dashboards and visualizations)
 ```
 ├── README.md
 ├── notebooks/
-│   └── customer_transform.ipynb     # PySpark transformation notebook
+│   ├── customer_transform.ipynb     # PySpark transformation notebook (CSV/Parquet exercise)
+│   └── unity_catalog_work.ipynb     # Unity Catalog tables, view, and function
 ├── adf-pipelines/
 │   └── CopySQLtoLake.json           # ADF pipeline definition
 ├── sql/
