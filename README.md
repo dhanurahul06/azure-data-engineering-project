@@ -64,23 +64,24 @@ Power BI                    (Reporting — dashboards and visualizations)
 ### ✅ Phase 4 — Databricks Transformation + Unity Catalog
 - Set up Azure Databricks workspace (Premium tier, serverless compute)
 - Connected ADLS Gen2 to Unity Catalog via Access Connector (managed identity) and External Location — verified read/write/list/delete access
-- PySpark notebook (`customer_transform.ipynb`): read raw customer CSV → added derived `FullName` column → wrote result as Parquet → read Parquet back and wrote a cleaned CSV to a separate `processed/` folder
+- PySpark script (`01_customer_transform.py`): read raw customer CSV → added derived `FullName` column → wrote result as Parquet → read Parquet back and wrote a cleaned CSV to a separate `processed/` folder
 - Created a dedicated Unity Catalog schema (`customer_data`) for the project
-- PySpark notebook (`unity_catalog_work.ipynb`):
+- PySpark script (`02_unity_catalog_work.py`):
   - Read cleaned customer CSV and wrote it into a managed Unity Catalog table (`customers_bronze`)
   - Re-read the source data, added a derived `IsMetro` column, and wrote it into a second managed table (`customers_enriched`)
   - Created a Unity Catalog **view** (`metro_customers_view`) filtering enriched customers to metro cities only
   - Created a Unity Catalog **SQL function** (`classify_signup`) categorizing customers as "Recent" or "Older" based on signup date, called directly within a query
 
-### ⏳ Phase 5 — Further Cleaning and Gold Layer
-- Read Silver Unity Catalog tables into Databricks
-- Apply business-level aggregations and further cleaning
-- Write final Gold-layer tables back into Unity Catalog
+### ✅ Phase 5 — Further Cleaning and Gold Layer
+- Read the Silver-layer table (`customers_enriched`) directly from Unity Catalog by table name
+- Built an aggregated, business-ready summary — customer counts grouped by City and metro classification (`IsMetro`)
+- Wrote the result into a new Gold-layer Unity Catalog table (`customers_gold_summary`)
 
-### ⏳ Phase 6 — Power BI Report
-- Connect Power BI Desktop to Unity Catalog via Databricks connector
-- Build interactive dashboard on Gold-layer tables
-- Full end-to-end traceability from source SQL row to Power BI visual
+### ✅ Phase 6 — Power BI Report
+- Connected Power BI Desktop to Unity Catalog via a Databricks SQL Warehouse (Personal Access Token authentication)
+- Loaded the Gold-layer table (`customers_gold_summary`) directly into Power BI
+- Built a bar chart visualizing customer distribution by city, split by metro classification
+- Full traceability confirmed: every value on the report traces back to a row originally inserted in Azure SQL Database in Phase 2
 
 ---
 
@@ -89,14 +90,16 @@ Power BI                    (Reporting — dashboards and visualizations)
 ```
 ├── README.md
 ├── notebooks/
-│   ├── customer_transform.ipynb     # PySpark transformation notebook (CSV/Parquet exercise)
-│   └── unity_catalog_work.ipynb     # Unity Catalog tables, view, and function
+│   ├── 01_customer_transform.py     # Bronze layer: raw read + FullName enrichment + Parquet round-trip
+│   ├── 02_unity_catalog_work.py     # Silver layer: UC tables, view, and function
+│   └── 03_gold_layer_transform.py   # Gold layer: aggregated summary table
 ├── adf-pipelines/
 │   └── CopySQLtoLake.json           # ADF pipeline definition
 ├── sql/
 │   └── create_tables.sql            # Source table DDL and sample data
-└── docs/
-    └── architecture.md              # Detailed architecture notes
+└── powerbi/
+    ├── customer_analytics.pbix      # Power BI report on Gold-layer data
+    └── powerbi_report_screenshot.png
 ```
 
 ---
@@ -118,7 +121,7 @@ Power BI                    (Reporting — dashboards and visualizations)
 1. **SQL Database** — Run `sql/create_tables.sql` against a new Azure SQL Database to recreate the source tables and sample data
 2. **Storage** — Create an ADLS Gen2 storage account with hierarchical namespace enabled; create a `landing` container
 3. **ADF** — Import `adf-pipelines/CopySQLtoLake.json` into a new Azure Data Factory instance; update Linked Service connection strings to point to your resources
-4. **Databricks** — Create an Azure Databricks workspace; import notebooks from the `notebooks/` folder; update the storage account path in Cell 1 to match your setup
+4. **Databricks** — Create an Azure Databricks workspace; import the `.py` files from the `notebooks/` folder as source-linked notebooks; update the storage account path in the first cell to match your setup
 5. **Unity Catalog** — Set up an Access Connector and External Location pointing to your ADLS Gen2 container (see notebook comments for details)
 
 ---
