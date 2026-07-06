@@ -129,9 +129,9 @@ Power BI                    (Reporting — dashboards and visualizations)
 ## Author
 
 **Rahul Varma** — Final Year B.Tech Information Technology, MIT Manipal  
-ITR Project | Data Architecture & Engineering Department  
+Mini-Project | Data Architecture & Engineering Department  
 [LinkedIn](https://www.linkedin.com/in/dhanunjay-rahul-varma-646893270/) <!-- add your LinkedIn URL here -->
 
 ---
 
-*Project in progress — updated as each phase is completed.*
+
